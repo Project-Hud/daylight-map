@@ -1,7 +1,7 @@
 (function () {
 
-  var wHeight = $(window).height()
-    , wWidth = $(window).width()
+  var wWidth = $(window).width()
+    , wHeight = wWidth / 2
     , mapTarget = $('#mapTarget')
 
   /*
@@ -36,35 +36,25 @@
     }
 
   function drawDayNightMap(){
-      var map = $("<canvas/>", {
+      var lightMap = $("<canvas/>", {
             "class":"daylightmap canvas",
-            "width": "100%",
-            "height": "100%"
         }).appendTo('.item.daylightmap')[0];
-
-      map.width = wWidth;
-      map.height = wHeight;
-      var ctx = map.getContext("2d");
+      lightMap.width = wWidth;
+      lightMap.height = wHeight;
+      var ctx = lightMap.getContext("2d");
 
       $(".item.daylightmap").append("<svg id='map' xmlns='http://www.w3.org/2000/svg' width='100%' height='100%'></svg>");
       var map = d3.select("svg");
       var width = $("svg").parent().width();
       var height = $("svg").parent().height();
 
-      var projection = d3.geo.equirectangular().scale((width/630)*100).translate([width/2, height/2]);
+      var projection = d3.geo.equirectangular().scale((width/630)*100).translate([width/2, wHeight / 2]);
       var path = d3.geo.path().projection(projection);
       var graticule = d3.geo.graticule();
 
       map.append("path")
           .datum(graticule.outline)
           .attr("class", "background")
-          .attr("d", path);
-
-      map.append("g")
-          .attr("class", "graticule")
-        .selectAll("path")
-          .data(graticule.lines)
-        .enter().append("path")
           .attr("d", path);
 
       map.append("path")
@@ -83,6 +73,7 @@
             .attr("class", "boundary")
             .attr("d", path);
       });
+
       performCalculations(new Date());
       var northSun = DECsun >= 0;
       var startFrom = northSun ? 0 : (wHeight - 1);
@@ -93,19 +84,19 @@
       ctx.fillStyle = "rgba(0, 0, 0, 0.2)";
 
       for(var x = 0; x < wWidth; ++x){
-          for(var y = startFrom; pstop(y); y += inc){
-              var lambda = pixelLambda(x);
-              var phi = pixelPhi(y) + 0.5 * (northSun ? -1 : 1);
+        for (var y = startFrom; pstop(y); y += inc) {
+          var lambda = pixelLambda(x);
+          var phi = pixelPhi(y) + 0.5 * (northSun ? -1 : 1);
 
-              var centralAngle = sind(phi) * sind(DECsun)
-                  + cosd(phi) * cosd(DECsun) * cosd(GHAsun - lambda);
-              centralAngle = Math.acos(centralAngle);
+          var centralAngle = sind(phi) * sind(DECsun)
+              + cosd(phi) * cosd(DECsun) * cosd(GHAsun - lambda);
+          centralAngle = Math.acos(centralAngle);
 
-              if(centralAngle > Math.PI / 2){
-                  var rectTop = northSun ? y : 0;
-                  var rectHeight = northSun ? wHeight - rectTop : y + 1;
+          if (centralAngle > Math.PI / 2){
+            var rectTop = northSun ? y : 0;
+            var rectHeight = northSun ? wHeight - rectTop : y + 1;
 
-                  ctx.fillRect(x, rectTop, 1, rectHeight);
+            ctx.fillRect(x, rectTop, 1, rectHeight);
             break;
           }
         }
