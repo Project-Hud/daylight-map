@@ -69,6 +69,7 @@
             .attr('d', path)
       })
     }
+
   function drawLight() {
     adjustParameters()
     var lightMap = $('<canvas/>', {
@@ -87,7 +88,7 @@
     var inc = northSun ? 1 : -1
     ctx.fillStyle = 'rgba(0, 0, 0, 0.2)'
 
-    for(var x = 0; x < wWidth; x++){
+    for(var x = 0; x < wWidth; ++x){
       for (var y = startFrom; pstop(y); y += inc) {
         var lambda = pixelLambda(x)
         var phi = pixelPhi(y) + 0.5 * (northSun ? -1 : 1)
